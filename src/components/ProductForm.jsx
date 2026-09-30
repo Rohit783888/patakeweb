@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import ImageDropzone from './ImageDropzone'
+import { ALL_CATEGORIES } from '../lib/categories'
 
 const emptyForm = {
   name: '',
   sku: '',
   price: '',
   stock: '',
+  category: '',
   description: '',
   images: [],
 }
@@ -18,6 +20,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
           sku: initialProduct.sku ?? '',
           price: initialProduct.price ?? '',
           stock: initialProduct.stock ?? '',
+          category: initialProduct.category ?? '',
           description: initialProduct.description ?? '',
           images:
             initialProduct.images ?? (initialProduct.imageUrl ? [initialProduct.imageUrl] : []),
@@ -59,6 +62,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
         sku: form.sku.trim(),
         price: priceNumber,
         stock: stockNumber,
+        category: form.category,
         description: form.description.trim(),
         images: form.images,
       })
@@ -82,7 +86,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
               type="text"
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="Sparkly Unicorn Notebook"
+              placeholder="Peacock Fountain"
               autoFocus
             />
           </div>
@@ -95,7 +99,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
                 type="text"
                 value={form.sku}
                 onChange={(e) => handleChange('sku', e.target.value)}
-                placeholder="NOTE-014"
+                placeholder="PF01"
               />
             </div>
             <div className="field">
@@ -107,26 +111,41 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
                 step="0.01"
                 value={form.price}
                 onChange={(e) => handleChange('price', e.target.value)}
-                placeholder="12.50"
+                placeholder="300"
               />
             </div>
           </div>
 
-          <div className="field">
-            <label htmlFor="stock">Stock on hand</label>
-            <input
-              id="stock"
-              type="number"
-              min="0"
-              step="1"
-              value={form.stock}
-              onChange={(e) => handleChange('stock', e.target.value)}
-              placeholder="20"
-            />
+          <div className="field-row">
+            <div className="field">
+              <label htmlFor="stock">Stock on hand</label>
+              <input
+                id="stock"
+                type="number"
+                min="0"
+                step="1"
+                value={form.stock}
+                onChange={(e) => handleChange('stock', e.target.value)}
+                placeholder="20"
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="category">Category</label>
+              <select id="category" value={form.category} onChange={(e) => handleChange('category', e.target.value)}>
+                <option value="">Auto (guess from name)</option>
+                {ALL_CATEGORIES.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.emoji} {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="field">
-            <label htmlFor="imageUpload">Photos</label>
+            <label>
+              Photos {form.images.length > 0 && `(${form.images.length})`}
+            </label>
             <ImageDropzone value={form.images} onChange={(images) => handleChange('images', images)} />
           </div>
 
@@ -136,7 +155,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
               id="description"
               value={form.description}
               onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Short note about size, colors, age range, what's included..."
+              placeholder="Brand, pieces per box, sound, duration..."
             />
           </div>
 

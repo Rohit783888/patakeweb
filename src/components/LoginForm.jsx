@@ -39,7 +39,7 @@ export default function LoginForm() {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <p className="ledger-eyebrow">🖍️ Crayon Corner · Admin</p>
+        <p className="ledger-eyebrow">🎇 Firecrackers Hub · Admin</p>
         <h1 className="login-title">Sign in</h1>
         <form onSubmit={handleSubmit}>
           <div className="field">
