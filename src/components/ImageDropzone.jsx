@@ -98,9 +98,11 @@ export default function ImageDropzone({ value = [], onChange }) {
           </div>
         ) : (
           <p>
-            <strong>Drag & drop images here</strong>
+            <strong>{value.length ? '+ Add more photos' : 'Drag & drop photos here'}</strong>
             <br />
-            or click to browse. First image is the cover photo.
+            or click to browse — you can pick several at once.
+            <br />
+            The first photo is the cover; shoppers see all of them when they open the product.
           </p>
         )}
       </div>

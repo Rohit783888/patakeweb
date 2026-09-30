@@ -72,7 +72,7 @@ function AdminDashboard() {
       <header className="ledger-header">
         <div className="ledger-header-row">
           <div>
-            <p className="ledger-eyebrow">🖍️ Crayon Corner · Admin</p>
+            <p className="ledger-eyebrow">🎇 Firecrackers Hub · Admin</p>
             <h1 className="ledger-title">Manage Products</h1>
             <p className="ledger-sub">Signed in as {user.email}</p>
           </div>
@@ -111,6 +111,7 @@ function AdminDashboard() {
             key={product.id}
             product={product}
             adminMode
+            onOpen={openEditForm}
             onEdit={openEditForm}
             onDelete={handleDelete}
           />
