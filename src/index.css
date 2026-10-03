@@ -800,6 +800,11 @@ textarea {
   flex: 1;
 }
 
+.product-move-top {
+  width: 100%;
+  margin-top: 0.6rem;
+}
+
 /* ---------- Category effects (animated, behind card text) ---------- */
 
 .product-body {
