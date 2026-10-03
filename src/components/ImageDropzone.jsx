@@ -114,7 +114,18 @@ export default function ImageDropzone({ value = [], onChange }) {
           {value.map((url, idx) => (
             <div className="image-tile" key={url + idx}>
               <img src={url} alt={`Image ${idx + 1}`} />
-              {idx === 0 && <span className="image-tile__cover">Cover</span>}
+              {idx === 0 ? (
+                <span className="image-tile__cover">Cover</span>
+              ) : (
+                <button
+                  type="button"
+                  className="image-tile__make-cover"
+                  onClick={() => moveTo(idx, 0)}
+                  title="Use this photo as the cover on the homepage"
+                >
+                  ★ Set as cover
+                </button>
+              )}
               <div className="image-tile__actions">
                 <button type="button" onClick={() => moveTo(idx, idx - 1)} disabled={idx === 0} title="Move left">
                   ←

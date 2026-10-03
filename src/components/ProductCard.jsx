@@ -1,10 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { formatPrice, productImages } from '../lib/format'
 import { getCategory } from '../lib/categories'
 import { sparkBurst } from '../lib/fireworks'
+import CategoryFx from './CategoryFx'
 
 const LOW_STOCK = 5
+
+// One observer for all cards: toggles .is-visible so background effects
+// only animate while the card is on screen.
+let visibilityObserver = null
+function observeVisibility(el) {
+  if (typeof IntersectionObserver === 'undefined') {
+    el.classList.add('is-visible')
+    return () => {}
+  }
+  visibilityObserver ??= new IntersectionObserver(
+    (entries) => entries.forEach((e) => e.target.classList.toggle('is-visible', e.isIntersecting)),
+    { rootMargin: '100px' }
+  )
+  visibilityObserver.observe(el)
+  return () => visibilityObserver.unobserve(el)
+}
 
 export function ImagePlaceholder() {
   return (
@@ -16,7 +33,10 @@ export function ImagePlaceholder() {
 
 export default function ProductCard({ product, onOpen, onEdit, onDelete, adminMode = false, index = 0 }) {
   const [imageFailed, setImageFailed] = useState(false)
+  const cardRef = useRef(null)
   const { addToCart, updateQty, items } = useCart()
+
+  useEffect(() => observeVisibility(cardRef.current), [])
 
   const images = productImages(product)
   const cover = images[0]
@@ -40,6 +60,7 @@ export default function ProductCard({ product, onOpen, onEdit, onDelete, adminMo
 
   return (
     <article
+      ref={cardRef}
       className={`product-card ${outOfStock ? 'is-sold-out' : ''}`}
       style={{ '--i': index % 12 }}
       onClick={() => onOpen?.(product)}
@@ -79,6 +100,8 @@ export default function ProductCard({ product, onOpen, onEdit, onDelete, adminMo
       </button>
 
       <div className="product-body">
+        {/* Offset desyncs neighbouring cards so they don't all pulse together. */}
+        <CategoryFx category={category.id} offset={(index * 0.73) % 3} />
         <h3 className="product-name">{product.name}</h3>
         {product.description && <p className="product-desc">{product.description}</p>}
 
