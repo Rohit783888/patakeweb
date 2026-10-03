@@ -4,6 +4,12 @@ import { db } from '../firebase'
 
 export const PRODUCTS_COLLECTION = 'products'
 
+// Newest first. "Move to top" in admin sets sortAt to now, so that product
+// ranks as if it were just added and everything above it shifts down by one.
+function rank(product) {
+  return (product.sortAt ?? product.createdAt)?.toMillis?.() ?? 0
+}
+
 export function useProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,7 +20,10 @@ export function useProducts() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        setProducts(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })))
+        // 'estimate' fills in a just-written serverTimestamp() locally so the
+        // product jumps into place immediately instead of after the round-trip.
+        const list = snapshot.docs.map((d) => ({ id: d.id, ...d.data({ serverTimestamps: 'estimate' }) }))
+        setProducts(list.sort((a, b) => rank(b) - rank(a)))
         setLoading(false)
       },
       (err) => {

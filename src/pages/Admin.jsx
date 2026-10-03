@@ -61,6 +61,10 @@ function AdminDashboard() {
     closeForm()
   }
 
+  async function handleMoveToTop(product) {
+    await updateDoc(doc(db, PRODUCTS_COLLECTION, product.id), { sortAt: serverTimestamp() })
+  }
+
   async function handleDelete(product) {
     const sure = window.confirm(`Delete "${product.name}" from the catalog? This can't be undone.`)
     if (!sure) return
@@ -106,14 +110,16 @@ function AdminDashboard() {
       )}
 
       <div className="product-grid">
-        {products.map((product) => (
+        {products.map((product, index) => (
           <ProductCard
             key={product.id}
             product={product}
+            index={index}
             adminMode
             onOpen={openEditForm}
             onEdit={openEditForm}
             onDelete={handleDelete}
+            onMoveToTop={index > 0 ? handleMoveToTop : undefined}
           />
         ))}
       </div>

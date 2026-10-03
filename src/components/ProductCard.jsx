@@ -31,7 +31,7 @@ export function ImagePlaceholder() {
   )
 }
 
-export default function ProductCard({ product, onOpen, onEdit, onDelete, adminMode = false, index = 0 }) {
+export default function ProductCard({ product, onOpen, onEdit, onDelete, onMoveToTop, adminMode = false, index = 0 }) {
   const [imageFailed, setImageFailed] = useState(false)
   const cardRef = useRef(null)
   const { addToCart, updateQty, items } = useCart()
@@ -128,6 +128,19 @@ export default function ProductCard({ product, onOpen, onEdit, onDelete, adminMo
               </button>
             ))}
         </div>
+
+        {adminMode && onMoveToTop && (
+          <button
+            className="btn btn-ghost btn-sm product-move-top"
+            onClick={(e) => {
+              e.stopPropagation()
+              onMoveToTop(product)
+            }}
+            title="Show this product first on the storefront"
+          >
+            ↑ Move to top
+          </button>
+        )}
 
         {adminMode && (
           <div className="product-actions">
