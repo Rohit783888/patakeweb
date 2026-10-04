@@ -4,6 +4,7 @@ import ProductCard from '../components/ProductCard'
 import ProductModal from '../components/ProductModal'
 import CartBar from '../components/CartBar'
 import Hero from '../components/Hero'
+import SalePopup from '../components/SalePopup'
 import { ALL_CATEGORIES, getCategory } from '../lib/categories'
 
 const SORTS = {
@@ -167,6 +168,7 @@ export default function Storefront() {
       </footer>
 
       <CartBar />
+      <SalePopup triggerRef={shopRef} />
       {openProduct && <ProductModal product={openProduct} onClose={() => setOpenId(null)} />}
     </div>
   )

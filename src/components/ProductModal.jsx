@@ -5,6 +5,7 @@ import { getCategory } from '../lib/categories'
 import { sparkBurst } from '../lib/fireworks'
 import { ImagePlaceholder } from './ProductCard'
 import { WhatsAppIcon } from './CartBar'
+import PriceTag from './PriceTag'
 
 export default function ProductModal({ product, onClose }) {
   const images = productImages(product)
@@ -124,7 +125,7 @@ export default function ProductModal({ product, onClose }) {
           {product.sku && <p className="product-details-sku">SKU · {product.sku}</p>}
 
           <div className="product-details-price-row">
-            <span className="product-details-price">{formatPrice(product.price)}</span>
+            <PriceTag price={product.price} mrp={product.mrp} className="product-details-price" />
             <span className={`stock-pill ${outOfStock ? 'out' : stock <= 5 ? 'low' : ''}`}>
               {outOfStock ? 'Sold out' : stock <= 5 ? `Hurry, only ${stock} left` : 'In stock'}
             </span>

@@ -754,6 +754,30 @@ textarea {
   color: var(--gold);
 }
 
+.price-tag {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 0.4rem;
+}
+
+.price-mrp {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.price-off {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--whatsapp);
+}
+
+.product-details-price-row .price-mrp,
+.product-details-price-row .price-off {
+  font-size: 1.05rem;
+}
+
 .product-stock {
   font-size: 0.72rem;
   font-weight: 700;
@@ -1487,6 +1511,43 @@ textarea {
   flex-shrink: 0;
 }
 
+/* ---------- Sale popup ---------- */
+
+.sale-popup {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100vh - 3rem);
+  max-height: calc(100dvh - 3rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+  animation: pop-in 0.3s ease;
+}
+
+.sale-popup-img {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  object-fit: contain;
+  background: #2a1240;
+}
+
+.sale-popup-actions {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.85rem;
+}
+
+.sale-popup-actions > * {
+  flex: 1;
+}
+
 /* ---------- Product modal ---------- */
 
 .product-modal {
@@ -2091,6 +2152,16 @@ textarea {
 
 .field-error {
   margin: 0.5rem 0 0;
+}
+
+.field-hint {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: -0.4rem 0 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 /* ---------- Login screen ---------- */
