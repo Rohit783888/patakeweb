@@ -9,6 +9,15 @@ export function formatPrice(value) {
   return currency.format(Number(value) || 0)
 }
 
+/** Whole-number % off MRP, or 0 when there's no MRP above our price. */
+export function discountPercent(price, mrp) {
+  if (price === '' || price == null) return 0
+  const p = Number(price)
+  const m = Number(mrp)
+  if (!(m > 0) || !(p >= 0) || p >= m) return 0
+  return Math.round(((m - p) / m) * 100)
+}
+
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER
 
 export function whatsAppUrl(lines) {

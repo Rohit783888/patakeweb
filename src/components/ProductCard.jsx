@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, productImages } from '../lib/format'
+import { productImages } from '../lib/format'
 import { getCategory } from '../lib/categories'
 import { sparkBurst } from '../lib/fireworks'
 import CategoryFx from './CategoryFx'
+import PriceTag from './PriceTag'
 
 const LOW_STOCK = 5
 
@@ -107,7 +108,7 @@ export default function ProductCard({ product, onOpen, onEdit, onDelete, onMoveT
 
         <div className="product-footer">
           <div className="product-price-wrap">
-            <span className="product-price">{formatPrice(product.price)}</span>
+            <PriceTag price={product.price} mrp={product.mrp} />
             {adminMode && <span className="product-stock">{stock} in stock</span>}
           </div>
 

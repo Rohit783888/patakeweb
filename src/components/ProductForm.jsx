@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import ImageDropzone from './ImageDropzone'
+import PriceTag from './PriceTag'
 import { ALL_CATEGORIES } from '../lib/categories'
+import { discountPercent } from '../lib/format'
 
 const emptyForm = {
   name: '',
   sku: '',
   price: '',
+  mrp: '',
   stock: '',
   category: '',
   description: '',
@@ -19,6 +22,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
           name: initialProduct.name ?? '',
           sku: initialProduct.sku ?? '',
           price: initialProduct.price ?? '',
+          mrp: initialProduct.mrp ?? '',
           stock: initialProduct.stock ?? '',
           category: initialProduct.category ?? '',
           description: initialProduct.description ?? '',
@@ -49,6 +53,11 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
       setError('Enter a valid price.')
       return
     }
+    const mrpNumber = form.mrp === '' ? null : Number(form.mrp)
+    if (mrpNumber !== null && (Number.isNaN(mrpNumber) || mrpNumber < priceNumber)) {
+      setError('MRP should be at least our price. Leave it empty if there is no MRP.')
+      return
+    }
     const stockNumber = form.stock === '' ? 0 : Number(form.stock)
     if (Number.isNaN(stockNumber) || stockNumber < 0) {
       setError('Enter a valid stock quantity.')
@@ -61,6 +70,8 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
         name: form.name.trim(),
         sku: form.sku.trim(),
         price: priceNumber,
+        // null (not undefined) so clearing the field also clears it in Firestore.
+        mrp: mrpNumber,
         stock: stockNumber,
         category: form.category,
         description: form.description.trim(),
@@ -93,17 +104,19 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
 
           <div className="field-row">
             <div className="field">
-              <label htmlFor="sku">SKU</label>
+              <label htmlFor="mrp">MRP (printed on box)</label>
               <input
-                id="sku"
-                type="text"
-                value={form.sku}
-                onChange={(e) => handleChange('sku', e.target.value)}
-                placeholder="PF01"
+                id="mrp"
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.mrp}
+                onChange={(e) => handleChange('mrp', e.target.value)}
+                placeholder="500 (optional)"
               />
             </div>
             <div className="field">
-              <label htmlFor="price">Price</label>
+              <label htmlFor="price">Our price</label>
               <input
                 id="price"
                 type="number"
@@ -115,8 +128,23 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
               />
             </div>
           </div>
+          {discountPercent(form.price, form.mrp) > 0 && (
+            <p className="field-hint">
+              Shoppers will see: <PriceTag price={form.price} mrp={form.mrp} />
+            </p>
+          )}
 
           <div className="field-row">
+            <div className="field">
+              <label htmlFor="sku">SKU</label>
+              <input
+                id="sku"
+                type="text"
+                value={form.sku}
+                onChange={(e) => handleChange('sku', e.target.value)}
+                placeholder="PF01"
+              />
+            </div>
             <div className="field">
               <label htmlFor="stock">Stock on hand</label>
               <input
@@ -129,17 +157,18 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
                 placeholder="20"
               />
             </div>
-            <div className="field">
-              <label htmlFor="category">Category</label>
-              <select id="category" value={form.category} onChange={(e) => handleChange('category', e.target.value)}>
-                <option value="">Auto (guess from name)</option>
-                {ALL_CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.emoji} {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="category">Category</label>
+            <select id="category" value={form.category} onChange={(e) => handleChange('category', e.target.value)}>
+              <option value="">Auto (guess from name)</option>
+              {ALL_CATEGORIES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.emoji} {c.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="field">
