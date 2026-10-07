@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, orderLine, productImages, whatsAppUrl, WHATSAPP_NUMBER } from '../lib/format'
+import { formatPrice, productImages } from '../lib/format'
 import { getCategory } from '../lib/categories'
 import { sparkBurst } from '../lib/fireworks'
 import { ImagePlaceholder } from './ProductCard'
-import { WhatsAppIcon } from './CartBar'
 import PriceTag from './PriceTag'
 
 export default function ProductModal({ product, onClose }) {
@@ -14,7 +13,7 @@ export default function ProductModal({ product, onClose }) {
   const [added, setAdded] = useState(false)
   const closeRef = useRef(null)
   const touchX = useRef(null)
-  const { addToCart, items } = useCart()
+  const { addToCart, updateQty, items, setCartOpen } = useCart()
 
   const stock = Number(product.stock) || 0
   const outOfStock = stock <= 0
@@ -51,9 +50,13 @@ export default function ProductModal({ product, onClose }) {
     setTimeout(() => setAdded(false), 1600)
   }
 
-  function handleWhatsApp() {
-    const lines = [`Hi! I'd like to order:`, orderLine(product, qty), `Could you confirm availability?`]
-    window.open(whatsAppUrl(lines), '_blank', 'noopener,noreferrer')
+  // Goes straight to the cart. If the item is already there it isn't added a
+  // second time; the quantity is just raised to what's picked here, if higher.
+  function handleBuyNow() {
+    if (!inCart) addToCart(product, qty)
+    else if (qty > inCart.qty) updateQty(product.id, qty)
+    onClose()
+    setCartOpen(true)
   }
 
   return (
@@ -153,14 +156,8 @@ export default function ProductModal({ product, onClose }) {
           {inCart && <p className="product-details-incart">🛒 {inCart.qty} already in your cart</p>}
 
           {!outOfStock && (
-            <button
-              type="button"
-              className="whatsapp-btn"
-              onClick={handleWhatsApp}
-              disabled={!WHATSAPP_NUMBER}
-              title={!WHATSAPP_NUMBER ? 'Set VITE_WHATSAPP_NUMBER in .env' : undefined}
-            >
-              <WhatsAppIcon /> Order just this on WhatsApp
+            <button type="button" className="buy-now-btn" onClick={handleBuyNow}>
+              ⚡ Buy now
             </button>
           )}
         </div>

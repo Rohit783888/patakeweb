@@ -4,6 +4,8 @@ const CartContext = createContext(null)
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]) // [{ product, qty }]
+  // Shared so other screens (e.g. "Buy now" in the product modal) can open the cart drawer.
+  const [isCartOpen, setCartOpen] = useState(false)
 
   const addToCart = useCallback((product, qty = 1) => {
     setItems((prev) => {
@@ -35,7 +37,7 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, updateQty, removeFromCart, clearCart, totalItems, totalPrice }}
+      value={{ items, addToCart, updateQty, removeFromCart, clearCart, totalItems, totalPrice, isCartOpen, setCartOpen }}
     >
       {children}
     </CartContext.Provider>
