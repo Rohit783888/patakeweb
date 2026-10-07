@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, orderLine, productImages, whatsAppUrl, WHATSAPP_NUMBER } from '../lib/format'
+import { formatPrice, productImages } from '../lib/format'
+import { normalizePhone, submitOrder } from '../lib/orders'
 
 export function WhatsAppIcon() {
   return (
@@ -11,21 +12,10 @@ export function WhatsAppIcon() {
   )
 }
 
-function buildOrderLines(items, totalPrice) {
-  return [
-    `Hi! I'd like to order:`,
-    '',
-    ...items.map(({ product, qty }) => `• ${orderLine(product, qty)}`),
-    '',
-    `Total: ${formatPrice(totalPrice)}`,
-    '',
-    'Could you confirm availability?',
-  ]
-}
-
 export default function CartBar() {
   const { items, updateQty, removeFromCart, clearCart, totalItems, totalPrice } = useCart()
   const [open, setOpen] = useState(false)
+  const [step, setStep] = useState('cart') // 'cart' | 'checkout' | 'done'
   const [bump, setBump] = useState(false)
   const prevCount = useRef(totalItems)
 
@@ -44,18 +34,22 @@ export default function CartBar() {
     if (items.length === 0) setOpen(false)
   }, [items.length])
 
+  // The cart is only emptied once the shopper closes the "order received"
+  // screen; emptying it straight away would unmount the drawer.
+  function close() {
+    setOpen(false)
+    if (step === 'done') clearCart()
+    setStep('cart')
+  }
+
   useEffect(() => {
     if (!open) return
-    const onKey = (e) => e.key === 'Escape' && setOpen(false)
+    const onKey = (e) => e.key === 'Escape' && close()
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  })
 
   if (items.length === 0) return null
-
-  function handleOrder() {
-    window.open(whatsAppUrl(buildOrderLines(items, totalPrice)), '_blank', 'noopener,noreferrer')
-  }
 
   return (
     <>
@@ -70,66 +64,145 @@ export default function CartBar() {
       </button>
 
       {open && (
-        <div className="modal-overlay modal-overlay--drawer" onClick={() => setOpen(false)}>
+        <div className="modal-overlay modal-overlay--drawer" onClick={close}>
           <aside className="cart-drawer" role="dialog" aria-modal="true" aria-label="Your cart" onClick={(e) => e.stopPropagation()}>
             <div className="cart-drawer-head">
-              <h2 className="modal-title">Your cart</h2>
-              <button type="button" className="modal-close modal-close--inline" onClick={() => setOpen(false)} aria-label="Close cart">
+              <h2 className="modal-title">{step === 'done' ? 'Order received' : step === 'checkout' ? 'Checkout' : 'Your cart'}</h2>
+              <button type="button" className="modal-close modal-close--inline" onClick={close} aria-label="Close cart">
                 ✕
               </button>
             </div>
 
-            <div className="cart-list">
-              {items.map(({ product, qty }) => {
-                const thumb = productImages(product)[0]
-                return (
-                  <div className="cart-row" key={product.id}>
-                    <div className="cart-row-thumb">{thumb ? <img src={thumb} alt="" /> : '🎆'}</div>
-                    <div className="cart-row-info">
-                      <p className="cart-row-name">{product.name}</p>
-                      <p className="cart-row-price">
-                        {formatPrice(product.price)} × {qty} = <strong>{formatPrice((Number(product.price) || 0) * qty)}</strong>
-                      </p>
-                      <div className="qty-stepper">
-                        <button type="button" onClick={() => updateQty(product.id, qty - 1)} aria-label="Decrease quantity">
-                          −
-                        </button>
-                        <span>{qty}</span>
-                        <button type="button" onClick={() => updateQty(product.id, qty + 1)} aria-label="Increase quantity">
-                          +
+            {step === 'done' ? (
+              <div className="checkout-done">
+                <p className="checkout-done-icon" aria-hidden="true">
+                  🎉
+                </p>
+                <p className="checkout-done-title">Thank you! We've got your order.</p>
+                <p>Our team will call you shortly to confirm availability and delivery.</p>
+                <button type="button" className="btn btn-primary" onClick={close}>
+                  Continue shopping
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="cart-list">
+                  {items.map(({ product, qty }) => {
+                    const thumb = productImages(product)[0]
+                    return (
+                      <div className="cart-row" key={product.id}>
+                        <div className="cart-row-thumb">{thumb ? <img src={thumb} alt="" /> : '🎆'}</div>
+                        <div className="cart-row-info">
+                          <p className="cart-row-name">{product.name}</p>
+                          <p className="cart-row-price">
+                            {formatPrice(product.price)} × {qty} = <strong>{formatPrice((Number(product.price) || 0) * qty)}</strong>
+                          </p>
+                          <div className="qty-stepper">
+                            <button type="button" onClick={() => updateQty(product.id, qty - 1)} aria-label="Decrease quantity">
+                              −
+                            </button>
+                            <span>{qty}</span>
+                            <button type="button" onClick={() => updateQty(product.id, qty + 1)} aria-label="Increase quantity">
+                              +
+                            </button>
+                          </div>
+                        </div>
+                        <button className="cart-row-remove" onClick={() => removeFromCart(product.id)} aria-label={`Remove ${product.name}`}>
+                          ✕
                         </button>
                       </div>
-                    </div>
-                    <button className="cart-row-remove" onClick={() => removeFromCart(product.id)} aria-label={`Remove ${product.name}`}>
-                      ✕
-                    </button>
+                    )
+                  })}
+                </div>
+    
+                <div className="cart-footer">
+                  <div className="cart-total-row">
+                    <span>
+                      Total · {totalItems} item{totalItems === 1 ? '' : 's'}
+                    </span>
+                    <span>{formatPrice(totalPrice)}</span>
                   </div>
-                )
-              })}
-            </div>
-
-            <div className="cart-footer">
-              <div className="cart-total-row">
-                <span>
-                  Total · {totalItems} item{totalItems === 1 ? '' : 's'}
-                </span>
-                <span>{formatPrice(totalPrice)}</span>
-              </div>
-              <button
-                className="whatsapp-btn whatsapp-btn--lg"
-                onClick={handleOrder}
-                disabled={!WHATSAPP_NUMBER}
-                title={!WHATSAPP_NUMBER ? 'Set VITE_WHATSAPP_NUMBER in .env' : undefined}
-              >
-                <WhatsAppIcon /> Send order on WhatsApp
-              </button>
-              <button className="link-btn" onClick={clearCart}>
-                Clear cart
-              </button>
-            </div>
+                  {step === 'checkout' ? (
+                    <CheckoutForm items={items} onBack={() => setStep('cart')} onDone={() => setStep('done')} />
+                  ) : (
+                    <>
+                      <button className="btn btn-primary checkout-btn" onClick={() => setStep('checkout')}>
+                        Proceed to checkout
+                      </button>
+                      <button className="link-btn" onClick={clearCart}>
+                        Clear cart
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </aside>
         </div>
       )}
     </>
+  )
+}
+
+function CheckoutForm({ items, onBack, onDone }) {
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [error, setError] = useState('')
+  const [sending, setSending] = useState(false)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    const cleanName = name.trim()
+    const cleanPhone = normalizePhone(phone)
+    if (!cleanName) return setError('Please enter your name.')
+    if (!cleanPhone) return setError('Please enter a valid 10-digit mobile number.')
+
+    setError('')
+    setSending(true)
+    try {
+      await submitOrder({ name: cleanName, phone: cleanPhone, items })
+      onDone()
+    } catch {
+      setError("Couldn't place your order. Please check your internet and try again.")
+      setSending(false)
+    }
+  }
+
+  return (
+    <form className="checkout-form" onSubmit={handleSubmit} noValidate>
+      <div className="field">
+        <label htmlFor="checkout-name">Your name</label>
+        <input
+          id="checkout-name"
+          type="text"
+          autoComplete="name"
+          maxLength={80}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Rahul Sharma"
+          autoFocus
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="checkout-phone">Mobile number</label>
+        <input
+          id="checkout-phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          maxLength={16}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="98765 43210"
+        />
+      </div>
+      {error && <p className="form-error">{error}</p>}
+      <button type="submit" className="btn btn-primary checkout-btn" disabled={sending}>
+        {sending ? 'Placing order…' : 'Submit order'}
+      </button>
+      <button type="button" className="link-btn" onClick={onBack} disabled={sending}>
+        ← Back to cart
+      </button>
+    </form>
   )
 }

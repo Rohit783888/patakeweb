@@ -7,6 +7,8 @@ import { useProducts, PRODUCTS_COLLECTION } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
 import ProductForm from '../components/ProductForm'
 import LoginForm from '../components/LoginForm'
+import OrdersPanel from '../components/OrdersPanel'
+import { useOrders } from '../hooks/useOrders'
 
 export default function Admin() {
   const { user, loading } = useAuth()
@@ -31,6 +33,9 @@ export default function Admin() {
 function AdminDashboard() {
   const { user, logout } = useAuth()
   const { products, loading, error } = useProducts()
+  const ordersState = useOrders()
+  const newOrders = ordersState.orders.filter((o) => o.status === 'new').length
+  const [tab, setTab] = useState('products')
   const [formOpen, setFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -94,35 +99,63 @@ function AdminDashboard() {
         </div>
       </header>
 
-      <div className="toolbar">
-        <span className="count-tag">
-          {loading ? 'LOADING…' : `${products.length} ITEM${products.length === 1 ? '' : 'S'} ON RECORD`}
-        </span>
+      <div className="admin-tabs" role="tablist" aria-label="Admin sections">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'products'}
+          className={`cat-chip ${tab === 'products' ? 'is-active' : ''}`}
+          onClick={() => setTab('products')}
+        >
+          🎆 Products <span className="cat-chip-count">{products.length}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'orders'}
+          className={`cat-chip ${tab === 'orders' ? 'is-active' : ''}`}
+          onClick={() => setTab('orders')}
+        >
+          🧾 Orders
+          {newOrders > 0 && <span className="cat-chip-count admin-tab-new">{newOrders} new</span>}
+        </button>
       </div>
 
-      {error && <div className="banner error">{error}</div>}
+      {tab === 'orders' ? (
+        <OrdersPanel {...ordersState} />
+      ) : (
+        <>
+          <div className="toolbar">
+            <span className="count-tag">
+              {loading ? 'LOADING…' : `${products.length} ITEM${products.length === 1 ? '' : 'S'} ON RECORD`}
+            </span>
+          </div>
 
-      {!loading && !error && products.length === 0 && (
-        <div className="empty-state">
-          <h3>No products yet</h3>
-          <p>Click "+ Add product" to start building the catalog.</p>
-        </div>
+          {error && <div className="banner error">{error}</div>}
+
+          {!loading && !error && products.length === 0 && (
+            <div className="empty-state">
+              <h3>No products yet</h3>
+              <p>Click "+ Add product" to start building the catalog.</p>
+            </div>
+          )}
+
+          <div className="product-grid">
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                adminMode
+                onOpen={openEditForm}
+                onEdit={openEditForm}
+                onDelete={handleDelete}
+                onMoveToTop={index > 0 ? handleMoveToTop : undefined}
+              />
+            ))}
+          </div>
+        </>
       )}
-
-      <div className="product-grid">
-        {products.map((product, index) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            index={index}
-            adminMode
-            onOpen={openEditForm}
-            onEdit={openEditForm}
-            onDelete={handleDelete}
-            onMoveToTop={index > 0 ? handleMoveToTop : undefined}
-          />
-        ))}
-      </div>
 
       {formOpen && (
         <ProductForm initialProduct={editingProduct} onSave={handleSave} onCancel={closeForm} />
