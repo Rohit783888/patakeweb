@@ -13,8 +13,7 @@ export function WhatsAppIcon() {
 }
 
 export default function CartBar() {
-  const { items, updateQty, removeFromCart, clearCart, totalItems, totalPrice } = useCart()
-  const [open, setOpen] = useState(false)
+  const { items, updateQty, removeFromCart, clearCart, totalItems, totalPrice, isCartOpen: open, setCartOpen: setOpen } = useCart()
   const [step, setStep] = useState('cart') // 'cart' | 'checkout' | 'done'
   const [bump, setBump] = useState(false)
   const prevCount = useRef(totalItems)

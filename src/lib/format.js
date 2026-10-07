@@ -24,11 +24,6 @@ export function whatsAppUrl(lines) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`
 }
 
-export function orderLine(product, qty) {
-  const sku = product.sku ? ` (SKU: ${product.sku})` : ''
-  return `${product.name}${sku} x${qty} — ${formatPrice((Number(product.price) || 0) * qty)}`
-}
-
 // Products saved before multi-image support only have `imageUrl`.
 export function productImages(product) {
   if (product.images?.length) return product.images
