@@ -7,5 +7,23 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+
+    match /orders/{orderId} {
+      // Shoppers can place an order from checkout but never read one back,
+      // so customers' numbers are only visible in the admin Orders tab.
+      allow read, update, delete: if request.auth != null;
+      allow create: if isValidNewOrder(request.resource.data);
+    }
+
+    function isValidNewOrder(order) {
+      return order.keys().hasOnly(['name', 'phone', 'items', 'totalItems', 'totalPrice', 'status', 'createdAt'])
+        && order.name is string && order.name.size() > 0 && order.name.size() <= 80
+        // Same pattern as normalizePhone() in src/lib/orders.js.
+        && order.phone is string && order.phone.matches('[6-9][0-9]{9}')
+        && order.items is list && order.items.size() > 0 && order.items.size() <= 100
+        && order.totalItems is int && order.totalPrice is number
+        && order.status == 'new'
+        && order.createdAt == request.time;
+    }
   }
 }

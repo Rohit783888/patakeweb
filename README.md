@@ -92,6 +92,12 @@ allow read: if true;
 allow write: if request.auth != null;
 ```
 
+Checkout orders go to an `orders` collection that works the other way round:
+anyone can **create** an order (with a valid name, 10-digit mobile number and
+at least one item), but only signed-in admins can **read**, update or delete
+them, so customers' numbers stay private. Checkout fails with "Couldn't place
+your order" until these rules are deployed.
+
 Deploy it with the Firebase CLI:
 
 ```bash
