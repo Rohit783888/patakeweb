@@ -7,7 +7,7 @@ import { useProducts, PRODUCTS_COLLECTION } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
 import ProductForm from '../components/ProductForm'
 import LoginForm from '../components/LoginForm'
-import OrdersPanel from '../components/OrdersPanel'
+import OrdersPanel, { isSold } from '../components/OrdersPanel'
 import { useOrders } from '../hooks/useOrders'
 
 export default function Admin() {
@@ -34,7 +34,8 @@ function AdminDashboard() {
   const { user, logout } = useAuth()
   const { products, loading, error } = useProducts()
   const ordersState = useOrders()
-  const newOrders = ordersState.orders.filter((o) => o.status === 'new').length
+  // Sold orders don't need attention, so they're left out of the tab badge.
+  const openOrders = ordersState.orders.filter((o) => !isSold(o)).length
   const [tab, setTab] = useState('products')
   const [formOpen, setFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
@@ -117,7 +118,7 @@ function AdminDashboard() {
           onClick={() => setTab('orders')}
         >
           🧾 Orders
-          {newOrders > 0 && <span className="cat-chip-count admin-tab-new">{newOrders} new</span>}
+          {openOrders > 0 && <span className="cat-chip-count admin-tab-new">{openOrders} open</span>}
         </button>
       </div>
 
