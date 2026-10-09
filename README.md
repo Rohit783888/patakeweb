@@ -55,6 +55,13 @@ Fill in `.env` with:
   format, **digits only** (no `+`, spaces, or dashes). Example: for
   `+1 555 123 4567` use `15551234567`.
 - The two `VITE_CLOUDINARY_*` values — see the next section.
+- `VITE_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` — from a free
+  Cloudflare Turnstile widget. For local testing you can use Cloudflare's
+  always-pass test keys `1x00000000000000000000AA` (site) and
+  `1x0000000000000000000000000000000AA` (secret).
+- `FIREBASE_SERVICE_ACCOUNT` — the whole JSON from Firebase **Project settings →
+  Service accounts → Generate new private key**, on one line. Server-only:
+  never give it a `VITE_` prefix.
 
 ## 4. Set up image uploads (Cloudinary)
 
@@ -92,11 +99,12 @@ allow read: if true;
 allow write: if request.auth != null;
 ```
 
-Checkout orders go to an `orders` collection that works the other way round:
-anyone can **create** an order (with a valid name, 10-digit mobile number and
-at least one item), but only signed-in admins can **read**, update or delete
-them, so customers' numbers stay private. Checkout fails with "Couldn't place
-your order" until these rules are deployed.
+Checkout orders go to an `orders` collection. Browsers can't create orders
+directly: checkout posts to the `api/order.js` serverless function, which
+checks Cloudflare Turnstile (bot check), rejects fake-looking names and
+numbers, allows at most 3 orders per number per day, takes prices from the
+catalog, and then saves the order. Only signed-in admins can **read**, update
+or delete orders, so customers' numbers stay private.
 
 Deploy it with the Firebase CLI:
 

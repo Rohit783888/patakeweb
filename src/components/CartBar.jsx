@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { formatPrice, productImages } from '../lib/format'
-import { normalizePhone, submitOrder } from '../lib/orders'
+import { submitOrder } from '../lib/orders'
+import { checkLead } from '../lib/leadChecks'
+import Turnstile, { turnstileConfigured } from './Turnstile'
 
 export function WhatsAppIcon() {
   return (
@@ -146,24 +148,29 @@ export default function CartBar() {
 function CheckoutForm({ items, onBack, onDone }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  // Honeypot: hidden from people, but bots that fill every field fill this too.
+  const [website, setWebsite] = useState('')
+  const [token, setToken] = useState(null)
+  const [resetKey, setResetKey] = useState(0)
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const cleanName = name.trim()
-    const cleanPhone = normalizePhone(phone)
-    if (!cleanName) return setError('Please enter your name.')
-    if (!cleanPhone) return setError('Please enter a valid 10-digit mobile number.')
+    const lead = checkLead({ name, phone })
+    if (lead.error) return setError(lead.error)
+    if (!token) return setError('Please wait a moment while we check your connection, then try again.')
 
     setError('')
     setSending(true)
     try {
-      await submitOrder({ name: cleanName, phone: cleanPhone, items })
+      await submitOrder({ ...lead, items, turnstileToken: token, website })
       onDone()
-    } catch {
-      setError("Couldn't place your order. Please check your internet and try again.")
+    } catch (err) {
+      setError(err.message)
       setSending(false)
+      // The server has used up this token whatever the outcome; get a fresh one.
+      setResetKey((k) => k + 1)
     }
   }
 
@@ -175,7 +182,7 @@ function CheckoutForm({ items, onBack, onDone }) {
           id="checkout-name"
           type="text"
           autoComplete="name"
-          maxLength={80}
+          maxLength={60}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Rahul Sharma"
@@ -195,8 +202,21 @@ function CheckoutForm({ items, onBack, onDone }) {
           placeholder="98765 43210"
         />
       </div>
+      <div className="checkout-hp" aria-hidden="true">
+        <label htmlFor="checkout-website">Website</label>
+        <input
+          id="checkout-website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+        />
+      </div>
+      <Turnstile onToken={setToken} resetKey={resetKey} />
+      {!turnstileConfigured && <p className="form-error">Ordering is temporarily unavailable. Please try again later.</p>}
       {error && <p className="form-error">{error}</p>}
-      <button type="submit" className="btn btn-primary checkout-btn" disabled={sending}>
+      <button type="submit" className="btn btn-primary checkout-btn" disabled={sending || !turnstileConfigured}>
         {sending ? 'Placing order…' : 'Submit order'}
       </button>
       <button type="button" className="link-btn" onClick={onBack} disabled={sending}>
