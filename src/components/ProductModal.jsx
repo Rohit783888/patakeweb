@@ -5,6 +5,7 @@ import { getCategory } from '../lib/categories'
 import { sparkBurst } from '../lib/fireworks'
 import { ImagePlaceholder } from './ProductCard'
 import PriceTag from './PriceTag'
+import VideoLink from './VideoLink'
 
 export default function ProductModal({ product, onClose }) {
   const images = productImages(product)
@@ -135,6 +136,7 @@ export default function ProductModal({ product, onClose }) {
           </div>
 
           {product.description && <p className="product-details-desc">{product.description}</p>}
+          <VideoLink url={product.videoUrl} className="video-btn--lg" />
 
           {!outOfStock && (
             <div className="product-details-buy">

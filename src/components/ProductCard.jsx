@@ -5,6 +5,7 @@ import { getCategory } from '../lib/categories'
 import { sparkBurst } from '../lib/fireworks'
 import CategoryFx from './CategoryFx'
 import PriceTag from './PriceTag'
+import VideoLink from './VideoLink'
 
 const LOW_STOCK = 5
 
@@ -105,6 +106,7 @@ export default function ProductCard({ product, onOpen, onEdit, onDelete, onMoveT
         <CategoryFx category={category.id} offset={(index * 0.73) % 3} />
         <h3 className="product-name">{product.name}</h3>
         {product.description && <p className="product-desc">{product.description}</p>}
+        <VideoLink url={product.videoUrl} />
 
         <div className="product-footer">
           <div className="product-price-wrap">

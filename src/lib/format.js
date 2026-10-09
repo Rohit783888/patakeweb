@@ -24,6 +24,22 @@ export function whatsAppUrl(lines) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`
 }
 
+/**
+ * Cleans up a pasted video link ("youtu.be/abc" works too) and returns a full
+ * https URL, or '' if it isn't a web link. Only http(s) is allowed so a saved
+ * link can't run script when a shopper clicks it.
+ */
+export function normalizeVideoUrl(input) {
+  const raw = String(input ?? '').trim()
+  if (!raw) return ''
+  try {
+    const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`)
+    return (url.protocol === 'https:' || url.protocol === 'http:') && url.hostname.includes('.') ? url.href : ''
+  } catch {
+    return ''
+  }
+}
+
 // Products saved before multi-image support only have `imageUrl`.
 export function productImages(product) {
   if (product.images?.length) return product.images
