@@ -2,7 +2,7 @@ import { useState } from 'react'
 import ImageDropzone from './ImageDropzone'
 import PriceTag from './PriceTag'
 import { ALL_CATEGORIES } from '../lib/categories'
-import { discountPercent } from '../lib/format'
+import { discountPercent, normalizeVideoUrl } from '../lib/format'
 
 const emptyForm = {
   name: '',
@@ -12,6 +12,7 @@ const emptyForm = {
   stock: '',
   category: '',
   description: '',
+  videoUrl: '',
   images: [],
 }
 
@@ -26,6 +27,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
           stock: initialProduct.stock ?? '',
           category: initialProduct.category ?? '',
           description: initialProduct.description ?? '',
+          videoUrl: initialProduct.videoUrl ?? '',
           images:
             initialProduct.images ?? (initialProduct.imageUrl ? [initialProduct.imageUrl] : []),
         }
@@ -63,6 +65,11 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
       setError('Enter a valid stock quantity.')
       return
     }
+    const videoUrl = normalizeVideoUrl(form.videoUrl)
+    if (form.videoUrl.trim() && !videoUrl) {
+      setError('The video link should be a web address, like https://youtu.be/… Leave it empty if there is no video.')
+      return
+    }
 
     setSaving(true)
     try {
@@ -75,6 +82,7 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
         stock: stockNumber,
         category: form.category,
         description: form.description.trim(),
+        videoUrl,
         images: form.images,
       })
     } catch (err) {
@@ -185,6 +193,18 @@ export default function ProductForm({ initialProduct, onSave, onCancel }) {
               value={form.description}
               onChange={(e) => handleChange('description', e.target.value)}
               placeholder="Brand, pieces per box, sound, duration..."
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="videoUrl">Video link (optional)</label>
+            <input
+              id="videoUrl"
+              type="url"
+              inputMode="url"
+              value={form.videoUrl}
+              onChange={(e) => handleChange('videoUrl', e.target.value)}
+              placeholder="https://youtube.com/shorts/… or an Instagram reel link"
             />
           </div>
 

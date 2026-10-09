@@ -773,6 +773,52 @@ textarea {
   color: var(--gold);
 }
 
+.video-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.15rem 0 0.75rem;
+  padding: 0.35rem 0.8rem 0.35rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 92, 108, 0.55);
+  background: rgba(255, 92, 108, 0.14);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.video-btn:hover {
+  background: rgba(255, 92, 108, 0.28);
+  transform: translateY(-1px);
+}
+
+.video-btn-icon {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #ff3d5a;
+  color: #fff;
+  font-size: 0.6rem;
+  padding-left: 0.1rem;
+}
+
+.video-btn--lg {
+  margin: 0.25rem 0 1rem;
+  padding: 0.5rem 1rem 0.5rem 0.5rem;
+  font-size: 0.95rem;
+}
+
+.video-btn--lg .video-btn-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  font-size: 0.75rem;
+}
+
 .price-tag {
   display: inline-flex;
   align-items: baseline;
