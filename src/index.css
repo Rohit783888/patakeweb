@@ -2347,6 +2347,66 @@ textarea {
   margin-top: 0;
 }
 
+.order-views {
+  padding-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.order-card.is-sold {
+  border-color: rgba(37, 211, 102, 0.35);
+}
+
+.order-status.is-sold {
+  background: rgba(37, 211, 102, 0.18);
+  color: var(--whatsapp);
+}
+
+.order-sale {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(37, 211, 102, 0.08);
+  border: 1px solid rgba(37, 211, 102, 0.25);
+}
+
+.order-sale p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.order-sale-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 800;
+}
+
+.order-sale-row strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--whatsapp);
+}
+
+.order-remarks {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-style: italic;
+  color: var(--text) !important;
+}
+
+.sold-dialog-sub {
+  margin: -0.75rem 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.sold-dialog-sub strong {
+  color: var(--gold);
+}
+
 /* ---------- Forms ---------- */
 
 .field {
