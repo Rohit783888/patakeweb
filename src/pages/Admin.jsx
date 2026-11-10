@@ -9,6 +9,8 @@ import ProductForm from '../components/ProductForm'
 import LoginForm from '../components/LoginForm'
 import OrdersPanel, { isSold } from '../components/OrdersPanel'
 import { useOrders } from '../hooks/useOrders'
+import ExpensesPanel from '../components/ExpensesPanel'
+import { useExpenses } from '../hooks/useExpenses'
 
 export default function Admin() {
   const { user, loading } = useAuth()
@@ -34,6 +36,7 @@ function AdminDashboard() {
   const { user, logout } = useAuth()
   const { products, loading, error } = useProducts()
   const ordersState = useOrders()
+  const expensesState = useExpenses()
   // Sold orders don't need attention, so they're left out of the tab badge.
   const openOrders = ordersState.orders.filter((o) => !isSold(o)).length
   const [tab, setTab] = useState('products')
@@ -120,10 +123,21 @@ function AdminDashboard() {
           🧾 Orders
           {openOrders > 0 && <span className="cat-chip-count admin-tab-new">{openOrders} open</span>}
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'accounts'}
+          className={`cat-chip ${tab === 'accounts' ? 'is-active' : ''}`}
+          onClick={() => setTab('accounts')}
+        >
+          💰 Accounts
+        </button>
       </div>
 
       {tab === 'orders' ? (
         <OrdersPanel {...ordersState} />
+      ) : tab === 'accounts' ? (
+        <ExpensesPanel orders={ordersState.orders} {...expensesState} />
       ) : (
         <>
           <div className="toolbar">
